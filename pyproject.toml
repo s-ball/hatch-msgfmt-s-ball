@@ -1,0 +1,60 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "hatch-msgfmt"
+dynamic = ["version"]
+description = 'Automatically compile po files to mo ones at build time using msgfmt.py'
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"
+keywords = []
+authors = [
+  { name = "s-ball", email = "s-ball@laposte.net" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+]
+dependencies = []
+
+[project.urls]
+Documentation = "https://github.com/s-ball/hatch-msgfmt#readme"
+Issues = "https://github.com/s-ball/hatch-msgfmt/issues"
+Source = "https://github.com/s-ball/hatch-msgfmt"
+
+[tool.hatch.version]
+path = "hatch_msgfmt/__about__.py"
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:hatch_msgfmt tests}"
+
+[tool.coverage.run]
+source_pkgs = ["hatch_msgfmt", "tests"]
+branch = true
+parallel = true
+omit = [
+  "hatch_msgfmt/__about__.py",
+]
+
+[tool.coverage.paths]
+hatch_msgfmt = ["hatch_msgfmt", "*/hatch-msgfmt/hatch_msgfmt"]
+tests = ["tests", "*/hatch-msgfmt/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
