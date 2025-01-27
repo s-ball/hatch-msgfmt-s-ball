@@ -12,13 +12,14 @@ from hatchling.builders.hooks.plugin.interface import BuildHookInterface
 class MsgFmtBuildHook(BuildHookInterface):
     PLUGIN_NAME = "msgfmt"
     logger: logging.Logger = None
+    locale: Path
+    src: Path
 
     def clean(self, _versions: list[str]) -> None:
         self.build_conf()
-        locale = Path(self.directory) / self.config['locale']
-        self.logger.info('Cleaning everything in %s', str(locale))
+        self.logger.info('Cleaning everything in %s', str(self.locale))
         force = self.config.get("force_clean")
-        for name in sorted(locale.rglob('*'), reverse=True):
+        for name in sorted(self.locale.rglob('*'), reverse=True):
             if name.is_dir():
                 try:
                     name.rmdir()
@@ -39,6 +40,10 @@ class MsgFmtBuildHook(BuildHookInterface):
         if self.target_name != 'wheel':
             self.logger.warning('%s: unexpected target - call ignored',
                                 self.target_name)
+            return
+        if not self.src.is_dir():
+            self.logger.error('%s is not a directory: giving up',
+                              self.config['src'])
             return
 
     def build_logger(self, conf:[dict[str, str]]=None) -> logging.Logger:
@@ -72,3 +77,5 @@ class MsgFmtBuildHook(BuildHookInterface):
             self.config['src'] = 'src'
         if 'locale' not in self.config:
             self.config['locale'] = 'locale'
+        self.locale = Path(self.directory) / self.config['locale']
+        self.src = Path(self.root) / self.config['src']
