@@ -43,11 +43,12 @@ extra-dependencies = [
 check = "mypy --install-types --non-interactive {args:hatch_msgfmt tests}"
 
 [tool.coverage.run]
-source_pkgs = ["hatch_msgfmt", "tests"]
+source_pkgs = ["hatch_msgfmt"]
 branch = true
 parallel = true
 omit = [
   "hatch_msgfmt/__about__.py",
+  "hatch_msgfmt/hooks.py"
 ]
 
 [tool.coverage.paths]

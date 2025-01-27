@@ -3,6 +3,7 @@
 #  SPDX-License-Identifier: MIT
 import logging.config
 import sys
+from pathlib import Path
 from typing import Any
 
 from hatchling.builders.hooks.plugin.interface import BuildHookInterface
@@ -10,15 +11,35 @@ from hatchling.builders.hooks.plugin.interface import BuildHookInterface
 
 class MsgFmtBuildHook(BuildHookInterface):
     PLUGIN_NAME = "msgfmt"
-    def clean(self, versions: list[str]) -> None:
-        pass
-    logger = None
+    logger: logging.Logger = None
+
+    def clean(self, _versions: list[str]) -> None:
+        self.build_conf()
+        locale = Path(self.directory) / self.config['locale']
+        self.logger.info('Cleaning everything in %s', str(locale))
+        force = self.config.get("force_clean")
+        for name in sorted(locale.rglob('*'), reverse=True):
+            if name.is_dir():
+                try:
+                    name.rmdir()
+                except OSError as e:
+                    self.logger.warning('Folder %s not removed (not empty?)',
+                                        str(name), exc_info=e)
+            elif force or name.suffix == '.mo':
+                try:
+                    name.unlink()
+                except OSError as e:
+                    self.logger.warning('File %s not removed',
+                                        str(name), exc_info=e)
+
 
     def initialize(self, _version: str, _build_data: dict[str, Any]) -> None:
-        self.logger = self.build_logger(self.config.get('logging'))
+        self.build_conf()
         self.logger.info('hatch-msgfmt building %s', self.target_name)
         if self.target_name != 'wheel':
-            self.logger.warning('%s: unexpected target', self.target_name)
+            self.logger.warning('%s: unexpected target - call ignored',
+                                self.target_name)
+            return
 
     def build_logger(self, conf:[dict[str, str]]=None) -> logging.Logger:
         default_conf = {'level': logging.WARNING,
@@ -43,3 +64,11 @@ class MsgFmtBuildHook(BuildHookInterface):
         log_config['loggers'][self.PLUGIN_NAME]['level'] = default_conf['level']
         logging.config.dictConfig(log_config)
         return logging.getLogger(self.PLUGIN_NAME)
+
+    def build_conf(self):
+        if not self.logger:
+            self.logger = self.build_logger(self.config.get('logging'))
+        if 'src' not in self.config:
+            self.config['src'] = 'src'
+        if 'locale' not in self.config:
+            self.config['locale'] = 'locale'

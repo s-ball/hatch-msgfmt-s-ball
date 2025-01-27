@@ -15,8 +15,9 @@
 - [License](#license)
 
 ## Goal
-This package helps to automatically compile translation sources at build time.
-It is a [hatchling]() plugin that internally uses a patched version of
+This package is a [hatchling]() plugin that helps to automatically compile
+translation sources at build time.
+It internally uses a patched version of
 the `msgfmt.py` script from the Tools folder of a standard CPython
 installation.
 
