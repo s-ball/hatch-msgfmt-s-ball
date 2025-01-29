@@ -61,18 +61,20 @@ def test_context(new_project):
     print(new_project)
     hatch = shutil.which('hatch')
     build = subprocess.run([hatch, 'build', '--hooks-only'],
-                           cwd=new_project, stdout=subprocess.PIPE, check=False)
+                           cwd=new_project, stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE, check=False)
     print(build)
     assert build.returncode == 0
-    assert b'INFO' not in build.stdout
+    assert b'INFO' not in build.stderr
 
 
 def test_context_debug(new_project_debug):
     print(new_project_debug)
     hatch = shutil.which('hatch')
-    build = subprocess.run([hatch, 'build', '--hooks-only'],
-                           cwd=new_project_debug, stdout=subprocess.PIPE, check=False)
+    build = subprocess.run([hatch, '-v', 'build', '--hooks-only'],
+                           cwd=new_project_debug, stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE, check=False)
     print(build)
     assert build.returncode == 0
-    assert b'INFO - hatch-msgfmt-s-ball building wheel' in build.stdout
-    assert b'building sdist' not in build.stdout
+    assert b'hatch-msgfmt-s-ball building wheel' in build.stderr
+    assert b'building sdist' not in build.stderr
