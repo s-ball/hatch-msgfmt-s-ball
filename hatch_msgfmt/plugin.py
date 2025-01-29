@@ -43,7 +43,7 @@ class MsgFmtBuildHook(BuildHookInterface):
             return
         if not self.src.is_dir():
             self.logger.error('%s is not a directory: giving up',
-                              self.config['src'])
+                              self.config['messages'])
             return
 
     def build_logger(self, conf:[dict[str, str]]=None) -> logging.Logger:
@@ -73,9 +73,14 @@ class MsgFmtBuildHook(BuildHookInterface):
     def build_conf(self):
         if not self.logger:
             self.logger = self.build_logger(self.config.get('logging'))
-        if 'src' not in self.config:
-            self.config['src'] = 'src'
+        if 'messages' not in self.config:
+            self.config['messages'] = 'messages'
         if 'locale' not in self.config:
             self.config['locale'] = 'locale'
         self.locale = Path(self.directory) / self.config['locale']
-        self.src = Path(self.root) / self.config['src']
+        self.src = Path(self.root) / self.config['messages']
+        if 'domain' not in self.config:
+            self.config['domain'] = (
+                self.metadata.name
+                if self.config['messages'] in ('.', 'messages')
+                else self.src.name)
