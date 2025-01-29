@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "hatch-msgfmt"
+name = "hatch-msgfmt-s-ball"
 dynamic = ["version"]
 description = "Automatically compile po files to mo ones at build time using msgfmt.py"
 readme = "README.md"
@@ -28,9 +28,12 @@ classifiers = [
 dependencies = ["hatchling"]
 
 [project.urls]
-Documentation = "https://github.com/s-ball/hatch-msgfmt#readme"
-Issues = "https://github.com/s-ball/hatch-msgfmt/issues"
-Source = "https://github.com/s-ball/hatch-msgfmt"
+Documentation = "https://github.com/s-ball/hatch-msgfmt-s-ball#readme"
+Issues = "https://github.com/s-ball/hatch-msgfmt-s-ball/issues"
+Source = "https://github.com/s-ball/hatch-msgfmt-s-ball"
+
+[tool.hatch.build.targets.wheel]
+packages = ["hatch_msgfmt"]
 
 [tool.hatch.version]
 path = "hatch_msgfmt/__about__.py"
@@ -52,8 +55,8 @@ omit = [
 ]
 
 [tool.coverage.paths]
-hatch_msgfmt = ["hatch_msgfmt", "*/hatch-msgfmt/hatch_msgfmt"]
-tests = ["tests", "*/hatch-msgfmt/tests"]
+hatch_msgfmt = ["hatch_msgfmt"]
+tests = ["tests"]
 
 [tool.coverage.report]
 exclude_lines = [

@@ -4,3 +4,4 @@
 /.coverage
 /dist
 **/__pycache__
+/htmlcov

@@ -1,7 +1,7 @@
-# hatch-msgfmt
+# hatch-msgfmt-s-ball
 
-[![PyPI - Version](https://img.shields.io/pypi/v/hatch-msgfmt.svg)](https://pypi.org/project/hatch-msgfmt)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/hatch-msgfmt.svg)](https://pypi.org/project/hatch-msgfmt)
+[![PyPI - Version](https://img.shields.io/pypi/v/hatch-msgfmt-s-ball.svg)](https://pypi.org/project/hatch-msgfmt-s-ball)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/hatch-msgfmt-s-ball.svg)](https://pypi.org/project/hatch-msgfmt-s-ball)
 
 -----
 
@@ -10,7 +10,7 @@
 ## Table of Contents
 
 <!-- TOC 
-* [hatch-msgfmt](#hatch-msgfmt)
+* [hatch-msgfmt-s-ball](#hatch-msgfmt-s-ball)
 * [Automatically compile po files to mo ones at build time using msgfmt.py](#automatically-compile-po-files-to-mo-ones-at-build-time-using-msgfmtpy)
   * [Table of Contents](#table-of-contents)
 -->
@@ -41,7 +41,7 @@ This is currently only a work in progress. The rest of this document may not
 be accurate until a first usable version is published on PyPI.
 
 Releases use a semantic major.minor.patch versioning. The full source code
-is available on [GitHub](https://github.com/s-ball/hatch-msgfmt.git).
+is available on [GitHub](https://github.com/s-ball/hatch-msgfmt-s-ball.git).
 
 ## Usage
 
@@ -78,12 +78,12 @@ For every `.po` file found, a corresponding compiled file is generated as
 
 ### Configuration
 
-The `hatch-msgfmt` plugin can be configured as any other plugin through
+The `hatch-msgfmt-s-ball` plugin can be configured as any other plugin through
 the `pyproject.toml` file. You must first declare it with:
 
 ```toml
 [build-system]
-requires = ["hatchling", "hatch-msgfmt"]
+requires = ["hatchling", "hatch-msgfmt-s-ball"]
 build-backend = "hatchling.build"
 ```
 
@@ -113,11 +113,11 @@ it at build time.
 
 ### Developer installation
 
-If you want to use the source of `hatch-msgfmt`, you can download a source
+If you want to use the source of `hatch-msgfmt-s-ball`, you can download a source
 package form PyPI, or better clone it from GitHub:
 
 ```commandline
-git clone https://github.com/s-ball/hatch-msgfmt.git
+git clone https://github.com/s-ball/hatch-msgfmt-s-ball.git
 ```
 
 You will benefit from `git` for you own changes.
@@ -130,4 +130,4 @@ on GitHUB.
 
 ## License
 
-`hatch-msgfmt` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
+`hatch-msgfmt-s-ball` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.

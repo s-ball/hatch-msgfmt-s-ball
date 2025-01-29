@@ -30,7 +30,7 @@ def new_project(tmp_path, plugin_dir):
     project_file.write_text(
         f"""\
 [build-system]
-requires = ["hatchling", "hatch-msgfmt@ {plugin_dir.as_uri()}"]
+requires = ["hatchling", "hatch-msgfmt-s-ball@ {plugin_dir.as_uri()}"]
 build-backend = "hatchling.build"
 
 [project]
@@ -38,7 +38,7 @@ name = "my-app"
 version = "0.1.0"
 
 [tool.hatch.build.targets.wheel.hooks.msgfmt]
-src = "src"
+messages = "src"
 """,
         encoding='utf-8',
     )
@@ -74,5 +74,5 @@ def test_context_debug(new_project_debug):
                            cwd=new_project_debug, stdout=subprocess.PIPE, check=False)
     print(build)
     assert build.returncode == 0
-    assert b'INFO - hatch-msgfmt building wheel' in build.stdout
+    assert b'INFO - hatch-msgfmt-s-ball building wheel' in build.stdout
     assert b'building sdist' not in build.stdout
