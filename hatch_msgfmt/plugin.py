@@ -1,8 +1,10 @@
 #  SPDX-FileCopyrightText: 2025-present s-ball <s-ball@laposte.net>
 #  #
 #  SPDX-License-Identifier: MIT
+import re
 from pathlib import Path
-from typing import Any
+from typing import Any, Generator
+from .vendor.msgfmt import make
 
 from hatchling.builders.hooks.plugin.interface import BuildHookInterface
 
@@ -11,6 +13,7 @@ class MsgFmtBuildHook(BuildHookInterface):
     PLUGIN_NAME = "msgfmt"
     locale: Path
     src: Path
+    full = re.compile('^(.*)-([a-z]{2}(?:_[A-Z]{2})?)$')
 
     def clean(self, _versions: list[str]) -> None:
         self.build_conf()
@@ -41,9 +44,12 @@ class MsgFmtBuildHook(BuildHookInterface):
             self.app.display_error(
                 f'{self.config["messages"]} is not a directory: giving up')
             return
+        for (path, lang, domain) in self.source_files():
+            (self.locale / lang / 'LC_MESSAGES').mkdir(parents=True, exist_ok=True)
+            make(str(path), str(self.locale / lang / 'LC_MESSAGES'
+                                / (domain + '.mo')))
 
-    def build_conf(self):
-        print('app verbosity', self.app.verbosity)
+    def build_conf(self) -> None:
         if 'messages' not in self.config:
             self.config['messages'] = 'messages'
         if 'locale' not in self.config:
@@ -55,3 +61,17 @@ class MsgFmtBuildHook(BuildHookInterface):
                 self.metadata.name
                 if self.config['messages'] in ('.', 'messages')
                 else self.src.name)
+
+    def source_files(self) -> Generator[tuple[Path, str, str], None, None]:
+        rx = re.compile(r'^(?:(.+)-)?([a-z]{2,3}(?:_[A-Z]+)?)$')
+        for child in self.src.iterdir():
+            if child.is_dir():
+                # found a LANG folder
+                for po in child.rglob(r'*.po'):
+                    yield po, child.name, po.stem
+            elif child.suffix == '.po':
+                m = rx.match(child.stem)
+                if m:
+                    domain = (self.config['domain'] if m.group(1) is None
+                              else m.group(1))
+                    yield child, m.group(2), domain

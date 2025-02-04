@@ -63,7 +63,7 @@ source folder, or the package name if the source folder is `.` or `messages`.
 
 #### `LANG` folders organization
 
-Alternatively the source directory can contain `LANG` folders (e.g. *fr*
+Alternatively the source directory can contain `LANG` folders (e.g. *fr_CA*
 or *es*) that in turn contain `domain.po` files, possibly under a hierarchy
 of subfolders. The goal is to mimic a classical `locale` hierarchy:
 `LANG/LC_MESSAGES/domain.po`
@@ -101,8 +101,6 @@ to:
 [tool.hatch.build.targets.wheel.hooks.msgfmt]
 locale = "locale"
 messages = "messages"
-logging.level = "WARNING"
-logging.format = "%(name)s - %(levelname)s - %(message)s"
 ```
 
 ## Installation

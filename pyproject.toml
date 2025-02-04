@@ -51,7 +51,8 @@ branch = true
 parallel = true
 omit = [
   "hatch_msgfmt/__about__.py",
-  "hatch_msgfmt/hooks.py"
+  "hatch_msgfmt/hooks.py",
+  "hatch_msgfmt/vendor/*"
 ]
 
 [tool.coverage.paths]
