@@ -33,7 +33,7 @@ class MsgFmtBuildHook(BuildHookInterface):
                 except OSError:
                     self.app.display_warning(f'File {name.name} not removed')
 
-    def initialize(self, _version: str, _build_data: dict[str, Any]) -> None:
+    def initialize(self, _version: str, build_data: dict[str, Any]) -> None:
         self.build_conf()
         self.app.display_debug(f'hatch-msgfmt-s-ball building {self.target_name}')
         if self.target_name != 'wheel':
@@ -46,8 +46,11 @@ class MsgFmtBuildHook(BuildHookInterface):
             return
         for (path, lang, domain) in self.source_files():
             (self.locale / lang / 'LC_MESSAGES').mkdir(parents=True, exist_ok=True)
-            make(str(path), str(self.locale / lang / 'LC_MESSAGES'
-                                / (domain + '.mo')))
+            mo = str(self.locale / lang / 'LC_MESSAGES' / (domain + '.mo'))
+            make(str(path), mo)
+            build_data['artifacts'].append(
+                'locale/{lang}/LC_MESSAGES/{domain}.mo'.format(lang=lang,
+                                                               domain=domain))
 
     def build_conf(self) -> None:
         if 'messages' not in self.config:

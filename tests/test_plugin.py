@@ -175,7 +175,7 @@ class TestFmt:
         shutil.copy(data_dir / 'foo-fr.po', messages / 'foo-fr.po')
         hook = build_hook({'domain': 'foo'},root=messages.parent,
                           directory=Path('locale').parent)
-        build_data = {}
+        build_data = {'artifacts': []}
         with patch('hatch_msgfmt.plugin.make'):
             hook.initialize('standard', build_data)
             # noinspection PyUnresolvedReferences
@@ -189,7 +189,7 @@ class TestFmt:
         shutil.copy(data_dir / 'foo-fr.po', messages / 'fr.po')
         hook = build_hook({'domain': 'fee'},root=messages.parent,
                           directory=locale.parent)
-        build_data = {}
+        build_data = {'artifacts': []}
         hook.initialize('standard', build_data)
         assert (locale / 'fr' / 'LC_MESSAGES').is_dir()
         assert (locale / 'fr' / 'LC_MESSAGES' / 'foo.mo').exists()
@@ -199,3 +199,10 @@ class TestFmt:
                            locale / 'fr' / 'LC_MESSAGES' / 'bar.mo', 0)
         assert filecmp.cmp(locale / 'fr' / 'LC_MESSAGES' / 'foo.mo',
                            locale / 'fr' / 'LC_MESSAGES' / 'fee.mo', 0)
+        assert {'locale/fr/LC_MESSAGES/foo.mo', 'locale/fr/LC_MESSAGES/bar.mo',
+                'locale/fr/LC_MESSAGES/fee.mo'} == set(build_data['artifacts'])
+
+@pytest.mark.skip
+class TestGettext:
+    def test_data(self, data_dir, messages, locale):
+        shutil.copy(data_dir / 'foo-fr.po', messages / 'foo-fr.po')

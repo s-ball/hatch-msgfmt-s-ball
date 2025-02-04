@@ -37,8 +37,8 @@ tools.
 
 ## Current Status
 
-This is currently only a work in progress. The rest of this document may not
-be accurate until a first usable version is published on PyPI.
+This package is currently at a beta level. It works and has a test coverage
+above 90%. But it lacks documentation and real world tests.
 
 Releases use a semantic major.minor.patch versioning. The full source code
 is available on [GitHub](https://github.com/s-ball/hatch-msgfmt-s-ball.git).
