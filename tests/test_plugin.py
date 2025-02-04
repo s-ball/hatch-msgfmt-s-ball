@@ -5,7 +5,7 @@ import filecmp
 import shutil
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any
+from typing import Any, Union
 from unittest.mock import Mock, PropertyMock, patch
 
 from hatch_msgfmt import plugin
@@ -18,8 +18,8 @@ from hatch_msgfmt.plugin import MsgFmtBuildHook
 
 def build_hook(config: dict[str, Any]=None,
                target_name:str = 'wheel',
-               directory: str|Path = '.',
-               root: str|Path ='.'):
+               directory: Union[str, Path] = '.',
+               root: Union[str, Path] ='.'):
     if config is None:
         config = {}
     from hatchling.builders.config import BuilderConfig
