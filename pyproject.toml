@@ -14,7 +14,7 @@ authors = [
   { name = "s-ball", email = "s-ball@laposte.net" },
 ]
 classifiers = [
-  "Development Status :: 2 - Pre-Alpha",
+  "Development Status :: 4 - Beta",
   "Intended Audience :: Developers",
   "Topic :: Software Development :: Build Tools",
   "Framework :: Hatch",
