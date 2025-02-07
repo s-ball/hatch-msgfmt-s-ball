@@ -1,0 +1,2 @@
+0.2.0: First usable version
+    The mo files are built in the source folder for hatchling to collect them
