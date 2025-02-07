@@ -48,16 +48,16 @@ class MsgFmtBuildHook(BuildHookInterface):
             (self.locale / lang / 'LC_MESSAGES').mkdir(parents=True, exist_ok=True)
             mo = str(self.locale / lang / 'LC_MESSAGES' / (domain + '.mo'))
             make(str(path), mo)
-            build_data['artifacts'].append(
-                'locale/{lang}/LC_MESSAGES/{domain}.mo'.format(lang=lang,
-                                                               domain=domain))
+            mox = 'locale/{lang}/LC_MESSAGES/{domain}.mo'.format(lang=lang,
+                                                               domain=domain)
+            build_data['force_include'][mox] = mox
 
     def build_conf(self) -> None:
         if 'messages' not in self.config:
             self.config['messages'] = 'messages'
         if 'locale' not in self.config:
             self.config['locale'] = 'locale'
-        self.locale = Path(self.directory) / self.config['locale']
+        self.locale = Path(self.root) / self.config['locale']
         self.src = Path(self.root) / self.config['messages']
         if 'domain' not in self.config:
             self.config['domain'] = (

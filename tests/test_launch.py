@@ -3,6 +3,7 @@
 #  SPDX-License-Identifier: MIT
 import shutil
 import subprocess
+import zipfile
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -23,7 +24,7 @@ def plugin_dir():
 
 @pytest.fixture
 def new_project(tmp_path, plugin_dir):
-    project_dir = tmp_path / 'my-app'
+    project_dir = tmp_path / 'my_app'
     project_dir.mkdir()
 
     project_file = project_dir / 'pyproject.toml'
@@ -34,11 +35,12 @@ requires = ["hatchling", "hatch-msgfmt-s-ball@ {plugin_dir.as_uri()}"]
 build-backend = "hatchling.build"
 
 [project]
-name = "my-app"
+name = "my_app"
 version = "0.1.0"
 
 [tool.hatch.build.targets.wheel.hooks.msgfmt]
 messages = "src"
+domain = "my_app"
 """,
         encoding='utf-8',
     )
@@ -68,13 +70,38 @@ def test_context(new_project):
     assert b'INFO' not in build.stderr
 
 
-def test_context_debug(new_project_debug):
-    print(new_project_debug)
+def test_context_debug(new_project):
+    print(new_project)
     hatch = shutil.which('hatch')
     build = subprocess.run([hatch, '-v', 'build', '--hooks-only'],
-                           cwd=new_project_debug, stdout=subprocess.PIPE,
+                           cwd=new_project, stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE, check=False)
     print(build)
     assert build.returncode == 0
     assert b'hatch-msgfmt-s-ball building wheel' in build.stderr
     assert b'building sdist' not in build.stderr
+
+
+@pytest.fixture
+def data_dir() -> Path:
+    return Path(__file__).parent / 'data'
+
+
+def test_build(data_dir, new_project):
+    src = new_project / 'src'
+    src.mkdir()
+    shutil.copy(data_dir / 'foo-fr.po', src / 'my_app-fr.po')
+    py_folder = new_project / 'my_app'
+    py_folder.mkdir()
+    (py_folder/ '__init__.py').write_text("")
+    (py_folder/ '__main__.py').write_text("""
+print('my_app was launched'
+""")
+    hatch = shutil.which('hatch')
+    build = subprocess.run([hatch, 'build'],
+                           cwd=new_project, stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE, check=False)
+    assert build.returncode == 0
+    file = next((new_project / 'dist').glob('*.whl'))
+    z =zipfile.ZipFile(file)
+    assert z.getinfo('locale/fr/LC_MESSAGES/my_app.mo') is not None

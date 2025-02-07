@@ -54,7 +54,7 @@ def locale():
 class TestClean:
     @pytest.fixture
     def hook(self, locale):
-        return build_hook(directory=str(locale.parent))
+        return build_hook(root=str(locale.parent))
 
     def test_simple(self, locale, hook):
         fr = locale / 'fr'
@@ -120,11 +120,10 @@ class TestDefaultDomain:
 
 
 @pytest.fixture
-def messages():
-    with TemporaryDirectory() as d:
-        directory = Path(d, 'messages')
-        directory.mkdir()
-        yield directory
+def messages(locale):
+    directory = locale.parent / 'messages'
+    directory.mkdir()
+    yield directory
 
 
 class TestPoList:
@@ -173,23 +172,21 @@ class TestPoList:
 class TestFmt:
     def test_mocked(self, data_dir, messages):
         shutil.copy(data_dir / 'foo-fr.po', messages / 'foo-fr.po')
-        hook = build_hook({'domain': 'foo'},root=messages.parent,
-                          directory=Path('locale').parent)
-        build_data = {'artifacts': []}
+        hook = build_hook({'domain': 'foo'},root=messages.parent)
+        build_data = {'force_include': {}}
         with patch('hatch_msgfmt.plugin.make'):
             hook.initialize('standard', build_data)
             # noinspection PyUnresolvedReferences
             plugin.make.assert_called_with(
                 str(messages / 'foo-fr.po'),
-                str(Path('locale') / 'fr' / 'LC_MESSAGES' / 'foo.mo'))
+                str(messages.parent / 'locale' / 'fr' / 'LC_MESSAGES' / 'foo.mo'))
 
     def test_flat(self, data_dir, messages, locale):
         shutil.copy(data_dir / 'foo-fr.po', messages / 'foo-fr.po')
         shutil.copy(data_dir / 'foo-fr.po', messages / 'bar-fr.po')
         shutil.copy(data_dir / 'foo-fr.po', messages / 'fr.po')
-        hook = build_hook({'domain': 'fee'},root=messages.parent,
-                          directory=locale.parent)
-        build_data = {'artifacts': []}
+        hook = build_hook({'domain': 'fee'},root=messages.parent)
+        build_data = {'force_include': {}}
         hook.initialize('standard', build_data)
         assert (locale / 'fr' / 'LC_MESSAGES').is_dir()
         assert (locale / 'fr' / 'LC_MESSAGES' / 'foo.mo').exists()
@@ -200,9 +197,24 @@ class TestFmt:
         assert filecmp.cmp(locale / 'fr' / 'LC_MESSAGES' / 'foo.mo',
                            locale / 'fr' / 'LC_MESSAGES' / 'fee.mo', 0)
         assert {'locale/fr/LC_MESSAGES/foo.mo', 'locale/fr/LC_MESSAGES/bar.mo',
-                'locale/fr/LC_MESSAGES/fee.mo'} == set(build_data['artifacts'])
+                'locale/fr/LC_MESSAGES/fee.mo'
+                } == set(build_data['force_include'].values())
 
-@pytest.mark.skip
 class TestGettext:
     def test_data(self, data_dir, messages, locale):
+        import gettext
+
         shutil.copy(data_dir / 'foo-fr.po', messages / 'foo-fr.po')
+        hook = build_hook({'domain': 'fee'},root=messages.parent)
+        build_data = {'force_include': {}}
+        hook.initialize('standard', build_data)
+
+        assert gettext.find('foo', locale, ['fr_FR']) is not None
+
+        trans = gettext.translation('foo', locale, ['fr_FR'])
+        assert isinstance(trans, gettext.GNUTranslations)
+
+        assert 'éè' == trans.gettext('foo')
+        assert 'àç' == trans.ngettext('bar', 'baz', 1)
+        assert 'ça' == trans.ngettext('bar', 'baz', 2)
+        assert 'ça' == trans.ngettext('bar', 'baz', 0)
