@@ -1,6 +1,12 @@
 #  SPDX-FileCopyrightText: 2025-present s-ball <s-ball@laposte.net>
 #  #
 #  SPDX-License-Identifier: MIT
+"""
+This module contains the implementation of a hatchling hook plugin.
+
+This plugin allows to compile gettext .po files to .mo ones when building
+a wheel and to install them under an appropriate (but local) directory.
+"""
 import re
 from pathlib import Path
 from typing import Any, Generator
@@ -10,12 +16,16 @@ from hatchling.builders.hooks.plugin.interface import BuildHookInterface
 
 
 class MsgFmtBuildHook(BuildHookInterface):
-    PLUGIN_NAME = "msgfmt"
-    locale: Path
-    src: Path
+    """The implementation of the hook interface"""
+    PLUGIN_NAME = "msgfmt"      # required by the interface
+    locale: Path        # local folder for the gettext localedir folder
+    src: Path           # local folder for the source .po files
+
+    # A compiled regex to split a file name into domain-lang
     full = re.compile('^(.*)-([a-z]{2}(?:_[A-Z]{2})?)$')
 
     def clean(self, _versions: list[str]) -> None:
+        # Described in BuildHookInterface
         self.build_conf()
         self.app.display_debug('Cleaning everything in '
                                + self.config['locale'], 2)
@@ -34,6 +44,7 @@ class MsgFmtBuildHook(BuildHookInterface):
                     self.app.display_warning(f'File {name.name} not removed')
 
     def initialize(self, _version: str, build_data: dict[str, Any]) -> None:
+        # Described in BuildHookInterface
         self.build_conf()
         self.app.display_debug(f'hatch-msgfmt-s-ball building {self.target_name}')
         if self.target_name != 'wheel':
@@ -51,8 +62,16 @@ class MsgFmtBuildHook(BuildHookInterface):
             mox = 'locale/{lang}/LC_MESSAGES/{domain}.mo'.format(lang=lang,
                                                                domain=domain)
             build_data['force_include'][mox] = mox
+            self.app.display_debug('Compiling {src} to {locale}'.format(
+                src=str(path), locale=mox
+            ), 1)
 
     def build_conf(self) -> None:
+        """
+        Set default values for parameters not present in config files
+
+        :return: None
+        """
         if 'messages' not in self.config:
             self.config['messages'] = 'messages'
         if 'locale' not in self.config:
@@ -66,6 +85,12 @@ class MsgFmtBuildHook(BuildHookInterface):
                 else self.src.name)
 
     def source_files(self) -> Generator[tuple[Path, str, str], None, None]:
+        """
+        Build a generator of tuples (file_path, lang, domain) of po files.
+
+        :return: the generator
+        """
+        # a compiled regex to extract the domain if present and the lang code
         rx = re.compile(r'^(?:(.+)-)?([a-z]{2,3}(?:_[A-Z]+)?)$')
         for child in self.src.iterdir():
             if child.is_dir():

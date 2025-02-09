@@ -38,7 +38,9 @@ tools.
 ## Current Status
 
 This package is currently at a beta level. It works and has a test coverage
-above 90%. But it lacks documentation and real world tests.
+above 90%. But it lacks documentation and real world tests. Nevertheless, I
+already use it for (the development version of) 
+another project of mine [i18nparse](https://github.com/s-ball/i18nparse)
 
 Releases use a semantic major.minor.patch versioning. The full source code
 is available on [GitHub](https://github.com/s-ball/hatch-msgfmt-s-ball.git).
@@ -46,9 +48,10 @@ is available on [GitHub](https://github.com/s-ball/hatch-msgfmt-s-ball.git).
 ## Usage
 
 As it is only a `hatchling` hook plugin, this package has no direct interface.
-It uses the `logging` package for its messages which are written to the
-standard output stream, so it is possible to increase its verbosity when
-the behaviour is unexpected.
+It uses the Application object provided by hatchling for its messages,
+so it is possible to increase its verbosity when
+the behaviour is unexpected by just passing `-v` params to the `hatch build`
+command.
 
 ### `.po` files
 
@@ -102,6 +105,18 @@ to:
 locale = "locale"
 messages = "messages"
 ```
+
+In addition to the `locale` and `messages` options to respectively declare the
+source folder containing the `po` files and the generated locale folder, it is
+possible to declare a default domain with the `domain` directive:
+
+```toml
+[tool.hatch.build.targets.wheel.hooks.msgfmt]
+domain = "my_app"
+messages = "src"
+```
+As the messages folder is not named `messages` the default domain would have
+been `src` without the `domain` directive.
 
 ## Installation
 
