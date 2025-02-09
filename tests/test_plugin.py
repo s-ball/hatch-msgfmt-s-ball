@@ -162,6 +162,7 @@ class TestClean:
         mo = fr / 'foo.mo'
         mo.write_bytes(b'abcd')
         mo.chmod(0o444)            # mark the foo.mo file as read only
+        fr.chmod(0o555)            # and its directory too...
         assert len(list(locale.rglob('*'))) == 2
         hook.clean(['sdist', 'wheel'])
         assert len(list(locale.rglob('*'))) == 2
