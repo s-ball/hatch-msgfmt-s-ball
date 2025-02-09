@@ -1,4 +1,6 @@
-0.2.0: First usable version
-    The mo files are built in the source folder for hatchling to collect them
+0.4.1: Fix a test that was broken on Linux
 
 0.4.0: Add Python 3.8 support for WSL
+
+0.2.0: First usable version
+    The mo files are built in the source folder for hatchling to collect them
