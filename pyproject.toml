@@ -7,7 +7,7 @@ name = "hatch-msgfmt-s-ball"
 dynamic = ["version"]
 description = "Automatically compile po files to mo ones at build time using msgfmt.py"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.8"
 license = "MIT"
 keywords = []
 authors = [

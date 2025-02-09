@@ -7,6 +7,9 @@ This module contains the implementation of a hatchling hook plugin.
 This plugin allows to compile gettext .po files to .mo ones when building
 a wheel and to install them under an appropriate (but local) directory.
 """
+# required for 3.8 support
+# TODO: can be removed as soon as 3.8 support will be dropped
+from __future__ import annotations
 import re
 from pathlib import Path
 from typing import Any, Generator

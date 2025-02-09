@@ -7,6 +7,9 @@ This pytest module does the heavy testing of the plugin module.
 It ensures that every methode does the expected job when given the
 appropriate parameters
 """
+# required for 3.8 support
+# TODO: can be removed as soon as 3.8 support will be dropped
+from __future__ import annotations
 import filecmp
 import shutil
 from pathlib import Path
@@ -249,7 +252,7 @@ class TestPoList:
         """
         po1 = messages / 'en.po'
         po1.write_text('#foo')
-        po2 = po1.with_stem('myapp-fr_CA')
+        po2 = po1.with_name('myapp-fr_CA.po')
         po2.write_text('#bar')
         hook = build_hook({'domain': 'myapp'}, root = str(messages.parent))
         hook.build_conf()
@@ -267,7 +270,7 @@ class TestPoList:
         """
         po1 = messages / 'en.po'
         po1.write_text('#foo')
-        po2 = po1.with_stem('foo-fr_CA')
+        po2 = po1.with_name('foo-fr_CA.po')
         po2.write_text('#bar')
         hook = build_hook({'domain': 'myapp'}, root = str(messages.parent))
         hook.build_conf()
