@@ -76,7 +76,7 @@ It is even possible (but not recommended) to mix both organizations.
 ### `.mo` files
 
 For every `.po` file found, a corresponding compiled file is generated as
-`locale/LANG/LC_MESSAGES/domain.mo` under the build directory. The default
+`locale/LANG/LC_MESSAGES/domain.mo` under the project root directory. The default
 `locale` name can be changed through the builder configuration.
 
 ### Configuration
