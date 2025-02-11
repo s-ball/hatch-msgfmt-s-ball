@@ -10,6 +10,7 @@ appropriate parameters
 # required for 3.8 support
 # TODO: can be removed as soon as 3.8 support will be dropped
 from __future__ import annotations
+
 import filecmp
 import shutil
 from pathlib import Path
@@ -17,18 +18,20 @@ from tempfile import TemporaryDirectory
 from typing import Any, Union
 from unittest.mock import Mock, PropertyMock, patch
 
-from hatch_msgfmt import plugin
 import pytest
 from hatchling.bridge.app import Application
 from hatchling.metadata.core import ProjectMetadata
 
+from hatch_msgfmt import plugin
 from hatch_msgfmt.plugin import MsgFmtBuildHook
 
 
-def build_hook(config: dict[str, Any]=None,
-               target_name:str = 'wheel',
-               directory: Union[str, Path] = '.',
-               root: Union[str, Path] ='.'):
+def build_hook(
+    config: dict[str, Any] = None,
+    target_name: str = "wheel",
+    directory: Union[str, Path] = ".",
+    root: Union[str, Path] = ".",
+):
     """
     Builds a MsgFmtBuildHook with the correct parameters.
 
@@ -41,12 +44,18 @@ def build_hook(config: dict[str, Any]=None,
     :param root: the root directory (containing pyproject.toml in real)
     :return: a MsgFmtBuildHook
     """
-    if config is None:
-        config = {}
+    config = config or {}
     from hatchling.builders.config import BuilderConfig
-    return MsgFmtBuildHook(root, config, Mock(BuilderConfig),
-                           Mock(ProjectMetadata), directory, target_name,
-                           Mock(Application))
+
+    return MsgFmtBuildHook(
+        root,
+        config,
+        Mock(BuilderConfig),
+        Mock(ProjectMetadata),
+        directory,
+        target_name,
+        Mock(Application),
+    )
 
 
 @pytest.fixture
@@ -56,7 +65,7 @@ def data_dir() -> Path:
 
     :return: the path of the tests/data folder
     """
-    return Path(__file__).parent / 'data'
+    return Path(__file__).parent / "data"
 
 
 @pytest.fixture
@@ -76,10 +85,11 @@ def test_wrong_target():
 
     :return: None
     """
-    hook = build_hook(target_name='sdist')
-    hook.initialize('', {})
+    hook = build_hook(target_name="sdist")
+    hook.initialize("", {})
     hook.app.display_warning.assert_called()
-    assert 'sdist' in hook.app.display_warning.call_args_list[0][0][0]
+    assert "sdist" in hook.app.display_warning.call_args_list[0][0][0]
+
 
 @pytest.fixture
 def locale():
@@ -92,7 +102,7 @@ def locale():
     :return: a Path to a temporary locale folder
     """
     with TemporaryDirectory() as d:
-        directory = Path(d, 'locale')
+        directory = Path(d, "locale")
         directory.mkdir()
         yield directory
 
@@ -101,6 +111,7 @@ class TestClean:
     """
     Tests for the clean method of MsgFmtBuildHook
     """
+
     @pytest.fixture
     def hook(self, locale):
         """
@@ -120,12 +131,12 @@ class TestClean:
         :param hook: a configured MsgFmtBuildHook
         :return: None
         """
-        fr = locale / 'fr'
+        fr = locale / "fr"
         fr.mkdir()
-        mo = fr / 'foo.mo'
-        mo.write_bytes(b'abcd')
-        hook.clean(['sdist', 'wheel'])
-        assert len(list(locale.glob('*'))) == 0
+        mo = fr / "foo.mo"
+        mo.write_bytes(b"abcd")
+        hook.clean(["sdist", "wheel"])
+        assert len(list(locale.glob("*"))) == 0
 
     def test_other_than_mo(self, locale, hook):
         """
@@ -137,16 +148,16 @@ class TestClean:
         :param hook: a configured MsgFmtBuildHook
         :return: None
         """
-        fr = locale / 'fr'
+        fr = locale / "fr"
         fr.mkdir()
-        mo = fr / 'foo.mo'
-        other = fr/'foo'
-        mo.write_bytes(b'abcd')
-        other.write_bytes(b'ef')
-        assert len(list(locale.rglob('*'))) == 3
-        hook.clean(['sdist', 'wheel'])
+        mo = fr / "foo.mo"
+        other = fr / "foo"
+        mo.write_bytes(b"abcd")
+        other.write_bytes(b"ef")
+        assert len(list(locale.rglob("*"))) == 3
+        hook.clean(["sdist", "wheel"])
         # both fr/foo and fr shall remain...
-        assert len(list(locale.rglob('*'))) == 2
+        assert len(list(locale.rglob("*"))) == 2
 
     # noinspection PyUnresolvedReferences
     def test_unlink_error(self, locale, hook):
@@ -157,17 +168,17 @@ class TestClean:
         :param hook: a configured MsgFmtBuildHook
         :return: None
         """
-        fr = locale / 'fr'
+        fr = locale / "fr"
         fr.mkdir()
-        mo = fr / 'foo.mo'
-        mo.write_bytes(b'abcd')
-        mo.chmod(0o444)            # mark the foo.mo file as read only
-        fr.chmod(0o555)            # and its directory too...
-        assert len(list(locale.rglob('*'))) == 2
-        hook.clean(['sdist', 'wheel'])
-        assert len(list(locale.rglob('*'))) == 2
-        assert hook.app.display_warning.call_args_list[0][0][0].startswith('File')
-        assert 'foo.mo' in hook.app.display_warning.call_args_list[0][0][0]
+        mo = fr / "foo.mo"
+        mo.write_bytes(b"abcd")
+        mo.chmod(0o444)  # mark the foo.mo file as read only
+        fr.chmod(0o555)  # and its directory too...
+        assert len(list(locale.rglob("*"))) == 2
+        hook.clean(["sdist", "wheel"])
+        assert len(list(locale.rglob("*"))) == 2
+        assert hook.app.display_warning.call_args_list[0][0][0].startswith("File")
+        assert "foo.mo" in hook.app.display_warning.call_args_list[0][0][0]
 
     def test_force(self, locale, hook):
         """
@@ -177,22 +188,23 @@ class TestClean:
         :param hook: a configured MsgFmtBuildHook
         :return: None
         """
-        fr = locale / 'fr'
+        fr = locale / "fr"
         fr.mkdir()
-        mo = fr / 'foo.mo'
-        other = fr/'foo'
-        mo.write_bytes(b'abcd')
-        other.write_bytes(b'ef')
-        assert len(list(locale.rglob('*'))) == 3
-        hook.config['force_clean'] = True
-        hook.clean(['sdist', 'wheel'])
-        assert len(list(locale.rglob('*'))) == 0
+        mo = fr / "foo.mo"
+        other = fr / "foo"
+        mo.write_bytes(b"abcd")
+        other.write_bytes(b"ef")
+        assert len(list(locale.rglob("*"))) == 3
+        hook.config["force_clean"] = True
+        hook.clean(["sdist", "wheel"])
+        assert len(list(locale.rglob("*"))) == 0
 
 
 class TestDefaultDomain:
     """
     Test for detection and usage of a default gettext domain
     """
+
     # noinspection PyPropertyAccess
     def test_proj_name(self, hook):
         """
@@ -201,9 +213,9 @@ class TestDefaultDomain:
         :param hook: a default MsgFmtBuildHook
         :return: None
         """
-        type(hook.metadata).name = PropertyMock(return_value = 'proj_name')
+        type(hook.metadata).name = PropertyMock(return_value="proj_name")
         hook.build_conf()
-        assert hook.config['domain'] == 'proj_name'
+        assert hook.config["domain"] == "proj_name"
 
     def test_message(self):
         """
@@ -211,9 +223,9 @@ class TestDefaultDomain:
 
         :return: None
         """
-        hook = build_hook({'messages': 'dom'})
+        hook = build_hook({"messages": "dom"})
         hook.build_conf()
-        assert hook.config['domain'] == 'dom'
+        assert hook.config["domain"] == "dom"
 
     def test_domain(self):
         """
@@ -221,9 +233,9 @@ class TestDefaultDomain:
 
         :return: None
         """
-        hook = build_hook({'messages': 'src', 'domain': 'dom'})
+        hook = build_hook({"messages": "src", "domain": "dom"})
         hook.build_conf()
-        assert hook.config['domain'] == 'dom'
+        assert hook.config["domain"] == "dom"
 
 
 @pytest.fixture
@@ -234,7 +246,7 @@ def messages(locale):
     :param locale: the result of the locale fixture
     :return: None
     """
-    directory = locale.parent / 'messages'
+    directory = locale.parent / "messages"
     directory.mkdir()
     yield directory
 
@@ -251,16 +263,16 @@ class TestPoList:
         :param messages: a messages folder
         :return: None
         """
-        po1 = messages / 'en.po'
-        po1.write_text('#foo')
-        po2 = po1.with_name('myapp-fr_CA.po')
-        po2.write_text('#bar')
-        hook = build_hook({'domain': 'myapp'}, root = str(messages.parent))
+        po1 = messages / "en.po"
+        po1.write_text("#foo")
+        po2 = po1.with_name("myapp-fr_CA.po")
+        po2.write_text("#bar")
+        hook = build_hook({"domain": "myapp"}, root=str(messages.parent))
         hook.build_conf()
         lst = list(hook.source_files())
         assert len(lst) == 2
-        assert (po1, 'en', 'myapp') in lst
-        assert (po2, 'fr_CA', 'myapp') in lst
+        assert (po1, "en", "myapp") in lst
+        assert (po2, "fr_CA", "myapp") in lst
 
     def test_flat_many_domains(self, messages):
         """
@@ -269,16 +281,16 @@ class TestPoList:
         :param messages: a messages folder
         :return: None
         """
-        po1 = messages / 'en.po'
-        po1.write_text('#foo')
-        po2 = po1.with_name('foo-fr_CA.po')
-        po2.write_text('#bar')
-        hook = build_hook({'domain': 'myapp'}, root = str(messages.parent))
+        po1 = messages / "en.po"
+        po1.write_text("#foo")
+        po2 = po1.with_name("foo-fr_CA.po")
+        po2.write_text("#bar")
+        hook = build_hook({"domain": "myapp"}, root=str(messages.parent))
         hook.build_conf()
         lst = list(hook.source_files())
         assert len(lst) == 2
-        assert (po1, 'en', 'myapp') in lst
-        assert (po2, 'fr_CA', 'foo') in lst
+        assert (po1, "en", "myapp") in lst
+        assert (po2, "fr_CA", "foo") in lst
 
     def test_lang_folders(self, messages):
         """
@@ -287,26 +299,27 @@ class TestPoList:
         :param messages: a messages folder
         :return: None
         """
-        fr = messages / 'fr_FR' / 'LC_MESSAGES'
+        fr = messages / "fr_FR" / "LC_MESSAGES"
         fr.mkdir(parents=True)
-        de = messages /'de' / 'LC_MESSAGES'
+        de = messages / "de" / "LC_MESSAGES"
         de.mkdir(parents=True)
-        po1 = fr / 'myapp.po'
-        po1.write_text('#foo')
-        po2 = de / 'myapp.po'
-        po2.write_text('#bar')
+        po1 = fr / "myapp.po"
+        po1.write_text("#foo")
+        po2 = de / "myapp.po"
+        po2.write_text("#bar")
         hook = build_hook(root=messages.parent)
         hook.build_conf()
         lst = list(hook.source_files())
         assert len(lst) == 2
-        assert (po1, 'fr_FR', 'myapp') in lst
-        assert (po2, 'de', 'myapp') in lst
+        assert (po1, "fr_FR", "myapp") in lst
+        assert (po2, "de", "myapp") in lst
 
 
 class TestFmt:
     """
     Tests for the generation of a .mo file by FmtMsg.py
     """
+
     def test_mocked(self, data_dir, messages):
         """
         Ensures (through a Mock) that the make function is correctly called
@@ -315,15 +328,16 @@ class TestFmt:
         :param messages: a messages folder
         :return: None
         """
-        shutil.copy(data_dir / 'foo-fr.po', messages / 'foo-fr.po')
-        hook = build_hook({'domain': 'foo'},root=messages.parent)
-        build_data = {'force_include': {}}
-        with patch('hatch_msgfmt.plugin.make'):
-            hook.initialize('standard', build_data)
+        shutil.copy(data_dir / "foo-fr.po", messages / "foo-fr.po")
+        hook = build_hook({"domain": "foo"}, root=messages.parent)
+        build_data = {"force_include": {}}
+        with patch("hatch_msgfmt.plugin.make"):
+            hook.initialize("standard", build_data)
             # noinspection PyUnresolvedReferences
             plugin.make.assert_called_with(
-                str(messages / 'foo-fr.po'),
-                str(messages.parent / 'locale' / 'fr' / 'LC_MESSAGES' / 'foo.mo'))
+                str(messages / "foo-fr.po"),
+                str(messages.parent / "locale" / "fr" / "LC_MESSAGES" / "foo.mo"),
+            )
 
     def test_flat(self, data_dir, messages, locale):
         """
@@ -337,28 +351,38 @@ class TestFmt:
         :param locale: the locale folder
         :return: None
         """
-        shutil.copy(data_dir / 'foo-fr.po', messages / 'foo-fr.po')
-        shutil.copy(data_dir / 'foo-fr.po', messages / 'bar-fr.po')
-        shutil.copy(data_dir / 'foo-fr.po', messages / 'fr.po')
-        hook = build_hook({'domain': 'fee'},root=messages.parent)
-        build_data = {'force_include': {}}
-        hook.initialize('standard', build_data)
-        assert (locale / 'fr' / 'LC_MESSAGES').is_dir()
-        assert (locale / 'fr' / 'LC_MESSAGES' / 'foo.mo').exists()
-        assert (locale / 'fr' / 'LC_MESSAGES' / 'bar.mo').exists()
-        assert (locale / 'fr' / 'LC_MESSAGES' / 'fee.mo').exists()
-        assert filecmp.cmp(locale / 'fr' / 'LC_MESSAGES' / 'foo.mo',
-                           locale / 'fr' / 'LC_MESSAGES' / 'bar.mo', 0)
-        assert filecmp.cmp(locale / 'fr' / 'LC_MESSAGES' / 'foo.mo',
-                           locale / 'fr' / 'LC_MESSAGES' / 'fee.mo', 0)
-        assert {'locale/fr/LC_MESSAGES/foo.mo', 'locale/fr/LC_MESSAGES/bar.mo',
-                'locale/fr/LC_MESSAGES/fee.mo'
-                } == set(build_data['force_include'].values())
+        shutil.copy(data_dir / "foo-fr.po", messages / "foo-fr.po")
+        shutil.copy(data_dir / "foo-fr.po", messages / "bar-fr.po")
+        shutil.copy(data_dir / "foo-fr.po", messages / "fr.po")
+        hook = build_hook({"domain": "fee"}, root=messages.parent)
+        build_data = {"force_include": {}}
+        hook.initialize("standard", build_data)
+        assert (locale / "fr" / "LC_MESSAGES").is_dir()
+        assert (locale / "fr" / "LC_MESSAGES" / "foo.mo").exists()
+        assert (locale / "fr" / "LC_MESSAGES" / "bar.mo").exists()
+        assert (locale / "fr" / "LC_MESSAGES" / "fee.mo").exists()
+        assert filecmp.cmp(
+            locale / "fr" / "LC_MESSAGES" / "foo.mo",
+            locale / "fr" / "LC_MESSAGES" / "bar.mo",
+            0,
+        )
+        assert filecmp.cmp(
+            locale / "fr" / "LC_MESSAGES" / "foo.mo",
+            locale / "fr" / "LC_MESSAGES" / "fee.mo",
+            0,
+        )
+        assert {
+            "locale/fr/LC_MESSAGES/foo.mo",
+            "locale/fr/LC_MESSAGES/bar.mo",
+            "locale/fr/LC_MESSAGES/fee.mo",
+        } == set(build_data["force_include"].values())
+
 
 class TestGettext:
     """
     End-to-end test for the usage of the generated .mo file
     """
+
     def test_data(self, data_dir, messages, locale):
         """
         Ensures that the generated .mo file is correctly used by gettext
@@ -370,17 +394,17 @@ class TestGettext:
         """
         import gettext
 
-        shutil.copy(data_dir / 'foo-fr.po', messages / 'foo-fr.po')
-        hook = build_hook({'domain': 'fee'},root=messages.parent)
-        build_data = {'force_include': {}}
-        hook.initialize('standard', build_data)
+        shutil.copy(data_dir / "foo-fr.po", messages / "foo-fr.po")
+        hook = build_hook({"domain": "fee"}, root=messages.parent)
+        build_data = {"force_include": {}}
+        hook.initialize("standard", build_data)
 
-        assert gettext.find('foo', locale, ['fr_FR']) is not None
+        assert gettext.find("foo", locale, ["fr_FR"]) is not None
 
-        trans = gettext.translation('foo', locale, ['fr_FR'])
+        trans = gettext.translation("foo", locale, ["fr_FR"])
         assert isinstance(trans, gettext.GNUTranslations)
 
-        assert 'éè' == trans.gettext('foo')
-        assert 'àç' == trans.ngettext('bar', 'baz', 1)
-        assert 'ça' == trans.ngettext('bar', 'baz', 2)
-        assert 'ça' == trans.ngettext('bar', 'baz', 0)
+        assert "éè" == trans.gettext("foo")
+        assert "àç" == trans.ngettext("bar", "baz", 1)
+        assert "ça" == trans.ngettext("bar", "baz", 2)
+        assert "ça" == trans.ngettext("bar", "baz", 0)

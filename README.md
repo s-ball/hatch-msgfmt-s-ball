@@ -28,7 +28,8 @@
 <!-- TOC -->
 
 ## Goal
-This package is a [hatchling]() plugin that helps to automatically compile
+This package is a [hatchling](https://pypi.org/project/hatchling)
+plugin that helps to automatically compile
 translation sources at build time.
 It internally uses a patched version of
 the `msgfmt.py` script from the Tools folder of the CPython
