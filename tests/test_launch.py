@@ -44,6 +44,7 @@ def new_project(tmp_path, plugin_dir):
     """
     project_dir = tmp_path / 'my_app'
     project_dir.mkdir()
+    (project_dir / 'src').mkdir()
 
     project_file = project_dir / 'pyproject.toml'
     project_file.write_text(
@@ -121,7 +122,6 @@ def test_build(data_dir, new_project):
     :return: None
     """
     src = new_project / 'src'
-    src.mkdir()
     shutil.copy(data_dir / 'foo-fr.po', src / 'my_app-fr.po')
     py_folder = new_project / 'my_app'
     py_folder.mkdir()

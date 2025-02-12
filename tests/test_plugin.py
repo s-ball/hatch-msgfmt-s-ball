@@ -7,9 +7,6 @@ This pytest module does the heavy testing of the plugin module.
 It ensures that every methode does the expected job when given the
 appropriate parameters
 """
-# required for 3.8 support
-# TODO: can be removed as soon as 3.8 support will be dropped
-from __future__ import annotations
 
 import filecmp
 import shutil
@@ -29,9 +26,10 @@ from hatch_msgfmt.plugin import MsgFmtBuildHook
 def build_hook(
     config: dict[str, Any] = None,
     target_name: str = "wheel",
+    # TODO: replace with str | Path after 3.9 End Of Life (end 2025)
     directory: Union[str, Path] = ".",
     root: Union[str, Path] = ".",
-):
+) -> MsgFmtBuildHook:
     """
     Builds a MsgFmtBuildHook with the correct parameters.
 
@@ -69,7 +67,7 @@ def data_dir() -> Path:
 
 
 @pytest.fixture
-def hook():
+def hook() -> MsgFmtBuildHook:
     """
     A pytest fixture returning a default MsgFmtBuildHook
 
@@ -79,11 +77,9 @@ def hook():
 
 
 # noinspection PyUnresolvedReferences
-def test_wrong_target():
+def test_wrong_target() -> None:
     """
     Ensures that a warning is emitted is target is not wheel
-
-    :return: None
     """
     hook = build_hook(target_name="sdist")
     hook.initialize("", {})
@@ -113,7 +109,7 @@ class TestClean:
     """
 
     @pytest.fixture
-    def hook(self, locale):
+    def hook(self, locale) -> MsgFmtBuildHook:
         """
         A specialized fixture providing a MsgFmtBuildHook having a
         locale directory
@@ -123,13 +119,12 @@ class TestClean:
         """
         return build_hook(root=str(locale.parent))
 
-    def test_simple(self, locale, hook):
+    def test_simple(self, locale, hook) -> None:
         """
         Ensures that a single mo file under the locale directory is removed
 
         :param locale: path to the locale directory
         :param hook: a configured MsgFmtBuildHook
-        :return: None
         """
         fr = locale / "fr"
         fr.mkdir()
@@ -138,7 +133,7 @@ class TestClean:
         hook.clean(["sdist", "wheel"])
         assert len(list(locale.glob("*"))) == 0
 
-    def test_other_than_mo(self, locale, hook):
+    def test_other_than_mo(self, locale, hook) -> None:
         """
         Ensures that files without the .mo suffix are not removed.
 
@@ -146,7 +141,6 @@ class TestClean:
 
         :param locale: path to the locale folder
         :param hook: a configured MsgFmtBuildHook
-        :return: None
         """
         fr = locale / "fr"
         fr.mkdir()
@@ -160,13 +154,12 @@ class TestClean:
         assert len(list(locale.rglob("*"))) == 2
 
     # noinspection PyUnresolvedReferences
-    def test_unlink_error(self, locale, hook):
+    def test_unlink_error(self, locale, hook) -> None:
         """
         Ensures that an OS error when removing a .mo file issues a warning
 
         :param locale: path to the locale directory
         :param hook: a configured MsgFmtBuildHook
-        :return: None
         """
         fr = locale / "fr"
         fr.mkdir()
@@ -180,13 +173,12 @@ class TestClean:
         assert hook.app.display_warning.call_args_list[0][0][0].startswith("File")
         assert "foo.mo" in hook.app.display_warning.call_args_list[0][0][0]
 
-    def test_force(self, locale, hook):
+    def test_force(self, locale, hook) -> None:
         """
         Ensures that any file is removed with the force_clean option
 
         :param locale: path to the locale directory
         :param hook: a configured MsgFmtBuildHook
-        :return: None
         """
         fr = locale / "fr"
         fr.mkdir()
@@ -206,32 +198,28 @@ class TestDefaultDomain:
     """
 
     # noinspection PyPropertyAccess
-    def test_proj_name(self, hook):
+    def test_proj_name(self, hook) -> None:
         """
         Ensures that the default domain is the project name
 
         :param hook: a default MsgFmtBuildHook
-        :return: None
         """
         type(hook.metadata).name = PropertyMock(return_value="proj_name")
         hook.build_conf()
         assert hook.config["domain"] == "proj_name"
 
-    def test_message(self):
+    def test_message(self) -> None:
         """
         Ensures that the default domain is the name of the source folder
 
-        :return: None
         """
         hook = build_hook({"messages": "dom"})
         hook.build_conf()
         assert hook.config["domain"] == "dom"
 
-    def test_domain(self):
+    def test_domain(self) -> None:
         """
         Ensures that a specified domain name takes precedence
-
-        :return: None
         """
         hook = build_hook({"messages": "src", "domain": "dom"})
         hook.build_conf()
@@ -256,12 +244,11 @@ class TestPoList:
     Tests for the generation of the list of .po files
     """
 
-    def test_flat_single_domain(self, messages):
+    def test_flat_single_domain(self, messages) -> None:
         """
         Ensures that the list uses the default domain when the file name is LANG.po
 
         :param messages: a messages folder
-        :return: None
         """
         po1 = messages / "en.po"
         po1.write_text("#foo")
@@ -274,12 +261,11 @@ class TestPoList:
         assert (po1, "en", "myapp") in lst
         assert (po2, "fr_CA", "myapp") in lst
 
-    def test_flat_many_domains(self, messages):
+    def test_flat_many_domains(self, messages) -> None:
         """
         Ensures that a domain specified in the file name takes precedence
 
         :param messages: a messages folder
-        :return: None
         """
         po1 = messages / "en.po"
         po1.write_text("#foo")
@@ -292,12 +278,11 @@ class TestPoList:
         assert (po1, "en", "myapp") in lst
         assert (po2, "fr_CA", "foo") in lst
 
-    def test_lang_folders(self, messages):
+    def test_lang_folders(self, messages) -> None:
         """
         Ensures that a language folder is used
 
         :param messages: a messages folder
-        :return: None
         """
         fr = messages / "fr_FR" / "LC_MESSAGES"
         fr.mkdir(parents=True)
@@ -320,13 +305,12 @@ class TestFmt:
     Tests for the generation of a .mo file by FmtMsg.py
     """
 
-    def test_mocked(self, data_dir, messages):
+    def test_mocked(self, data_dir, messages) -> None:
         """
         Ensures (through a Mock) that the make function is correctly called
 
         :param data_dir: the tests/data folder containing a .po file
         :param messages: a messages folder
-        :return: None
         """
         shutil.copy(data_dir / "foo-fr.po", messages / "foo-fr.po")
         hook = build_hook({"domain": "foo"}, root=messages.parent)
@@ -339,7 +323,7 @@ class TestFmt:
                 str(messages.parent / "locale" / "fr" / "LC_MESSAGES" / "foo.mo"),
             )
 
-    def test_flat(self, data_dir, messages, locale):
+    def test_flat(self, data_dir, messages, locale) -> None:
         """
         Ensures that the .mo files are generated in the correct folder
 
@@ -349,7 +333,6 @@ class TestFmt:
         :param data_dir: the tests/data folder containing a .po file
         :param messages: a messages folder
         :param locale: the locale folder
-        :return: None
         """
         shutil.copy(data_dir / "foo-fr.po", messages / "foo-fr.po")
         shutil.copy(data_dir / "foo-fr.po", messages / "bar-fr.po")
@@ -383,14 +366,13 @@ class TestGettext:
     End-to-end test for the usage of the generated .mo file
     """
 
-    def test_data(self, data_dir, messages, locale):
+    def test_data(self, data_dir, messages, locale) -> None:
         """
         Ensures that the generated .mo file is correctly used by gettext
 
         :param data_dir: the tests/data folder containing a .po file
         :param messages: the source messages folder
         :param locale: the locale folder
-        :return: None
         """
         import gettext
 

@@ -7,7 +7,7 @@ name = "hatch-msgfmt-s-ball"
 dynamic = ["version"]
 description = "Automatically compile po files to mo ones at build time using msgfmt.py"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = "MIT"
 keywords = []
 authors = [
@@ -20,11 +20,11 @@ classifiers = [
   "Topic :: Software Development :: Localization",
   "Framework :: Hatch",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: Implementation :: CPython",
 ]
 dependencies = ["hatchling"]
@@ -70,3 +70,6 @@ exclude_lines = [
 
 [project.entry-points.hatch]
 msgfmt = "hatch_msgfmt.hooks"
+
+[[tool.hatch.envs.hatch-test.matrix]]
+python = ["3.13", "3.12", "3.11", "3.10", "3.9"]

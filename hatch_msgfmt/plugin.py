@@ -4,12 +4,9 @@
 """
 This module contains the implementation of a hatchling hook plugin.
 
-This plugin allows to compile gettext .po files to .mo ones when building
-a wheel and to install them under an appropriate (but local) directory.
+This plugin allows compiling gettext .po files to .mo ones when building
+a wheel and installing them under an appropriate (but local) directory.
 """
-# required for 3.8 support
-# TODO: can be removed as soon as 3.8 support will be dropped
-from __future__ import annotations
 
 import re
 from pathlib import Path
@@ -24,6 +21,9 @@ class MsgFmtBuildHook(BuildHookInterface):
     """The implementation of the hook interface"""
 
     PLUGIN_NAME = "msgfmt"  # required by the interface
+
+    # the names are declared here to avoid the warning for the creation
+    #  of attributes in a method other than __init__
     locale: Path  # local folder for the gettext localedir folder
     src: Path  # local folder for the source .po files
 
@@ -33,8 +33,10 @@ class MsgFmtBuildHook(BuildHookInterface):
         #  the direction force_clean=True is given) and empty directories
         # In any case a remove error is not fatal and will not abort the build
         self.build_conf()
+
         self.app.display_debug("Cleaning everything in " + self.config["locale"], 2)
         force = self.config.get("force_clean")
+
         for name in sorted(self.locale.rglob("*"), reverse=True):
             if name.is_dir():
                 try:
@@ -61,10 +63,11 @@ class MsgFmtBuildHook(BuildHookInterface):
             )
             return
         if not self.src.is_dir():
-            self.app.display_error(
+            self.app.abort(
                 f'{self.config["messages"]} is not a directory: giving up'
             )
             return
+
         for path, lang, domain in self.source_files():
             (self.locale / lang / "LC_MESSAGES").mkdir(parents=True, exist_ok=True)
             mo = str(self.locale / lang / "LC_MESSAGES" / (domain + ".mo"))
@@ -80,8 +83,6 @@ class MsgFmtBuildHook(BuildHookInterface):
     def build_conf(self) -> None:
         """
         Set default values for parameters not present in config files
-
-        :return: None
         """
         if "messages" not in self.config:
             self.config["messages"] = "messages"
@@ -89,6 +90,7 @@ class MsgFmtBuildHook(BuildHookInterface):
             self.config["locale"] = "locale"
         self.locale = Path(self.root) / self.config["locale"]
         self.src = Path(self.root) / self.config["messages"]
+
         if "domain" not in self.config:
             self.config["domain"] = (
                 self.metadata.name
@@ -99,10 +101,9 @@ class MsgFmtBuildHook(BuildHookInterface):
     def source_files(self) -> Generator[tuple[Path, str, str], None, None]:
         """
         Yield tuples (file_path, lang, domain) of po files.
-
-        :return: the generator
         """
         # a compiled regex to extract the domain if present and the lang code
+        #  ('foo-fr_FR' -> ('foo', 'fr_FR') or 'de' -> (None, 'de'))
         rx = re.compile(r"^(?:(.+)-)?([a-z]{2,3}(?:_[A-Z]+)?)$")
         for child in self.src.iterdir():
             if child.is_dir():
