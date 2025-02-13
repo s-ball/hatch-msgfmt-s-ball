@@ -1,3 +1,7 @@
+1.1.1: Documentation upgrade
+
+1.1.0: Drop support for Python3.8
+
 1.0.0: Declare the project as Production/Stable
     The project has been reviewed on CodeReview and
     the cosmetic improvements have been implemented

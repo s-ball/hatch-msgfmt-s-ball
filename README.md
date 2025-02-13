@@ -38,13 +38,20 @@ tools.
 
 ## Current Status
 
-This package is currently at a beta level. It works and has a test coverage
-above 90%. But it lacks documentation and real world tests. Nevertheless, I
-already use it for (the development version of) 
+This package is released as Production/Stable. It has a test coverage
+above 90%. I
+currently use it for (the development version of) 
 another project of mine [i18nparse](https://github.com/s-ball/i18nparse)
 
 Releases use a semantic major.minor.patch versioning. The full source code
 is available on [GitHub](https://github.com/s-ball/hatch-msgfmt-s-ball.git).
+
+### Old Python versions support
+
+Python 3.8 has reached its end of life, but it is still shipped in WSL. For
+that reason, it is no longer supported starting with the 1.1.0 version, but
+it is still supported in the 1.0.0 one. Major improvements or bug fixes should
+be implemented in the 1.0 branch.
 
 ## Usage
 
